@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Artifacts — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-4">Artifacts</h1>
+<ul class="space-y-1">
+{% for a in items %}
+  <li class="border border-neutral-800 rounded p-2">
+    <a class="hover:text-white" href="/artifacts/{{ a.id }}">{{ a.title }}</a>
+    <span class="text-xs text-neutral-500 ml-2">{{ a.created_at }}</span>
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}

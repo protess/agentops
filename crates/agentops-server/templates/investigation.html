@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ inv.title }} — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-1">{{ inv.title }}</h1>
+<p class="text-xs text-neutral-500 mb-4">{{ inv.status }}</p>
+
+<!--
+  `sse-close="terminal"` — an investigation is one-shot. Without it, even after the server
+  sends `terminal` and ends the SSE body, the browser's `EventSource` reads the body EOF
+  as a reconnect signal, reconnects about 3 seconds later with the same `after`, and the
+  server replays every step through `steps_after` and appends them again with `beforeend`
+  — endlessly, every 3 seconds, for as long as the tab is open (final review I-1).
+  `chat_panel.html` deliberately omits this attribute — see its own documentation.
+-->
+<div hx-ext="sse" sse-connect="/api/investigations/{{ inv.id }}/stream?after={{ after }}" sse-close="terminal">
+  <ul id="steps" class="space-y-2">
+    {{ steps_html|safe }}
+  </ul>
+  <div sse-swap="step" hx-swap="beforeend" hx-target="#steps"></div>
+  <div id="live" sse-swap="delta" hx-swap="beforeend" class="text-neutral-400"></div>
+</div>
+{% endblock %}

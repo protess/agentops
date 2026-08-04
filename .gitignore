@@ -1,0 +1,22 @@
+# graphify output — a regenerable cache, so it is not committed.
+# Kept in git it goes stale silently, and a stale graph is worse than no graph.
+# Regenerate with: graphify . --update
+graphify-out/
+
+# Rust
+/target/
+**/*.rs.bk
+
+# Python — the bytecode cache created by running scripts/*.py
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Worktrees — committed, the whole tree lands in the repository
+.claude/worktrees/
+# SDD ledgers, briefs, and review packages (scratch)
+.superpowers/

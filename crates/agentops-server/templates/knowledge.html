@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Knowledge — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-4">Knowledge</h1>
+<form hx-post="/api/instructions" hx-target="#list" hx-swap="innerHTML" hx-on::after-request="this.reset()"
+      class="mb-6 space-y-2">
+  <div class="flex gap-2">
+    <select name="phase" class="bg-neutral-900 border border-neutral-800 rounded p-2">
+      <option value="all">all</option>
+      <option value="chat">chat</option>
+      <option value="triage">triage</option>
+      <option value="rca">rca</option>
+      <option value="mitigation">mitigation</option>
+    </select>
+    <input name="position" type="number" value="0" required
+           class="w-20 bg-neutral-900 border border-neutral-800 rounded p-2">
+    <input name="title" placeholder="Title" required
+           class="flex-1 bg-neutral-900 border border-neutral-800 rounded p-2">
+  </div>
+  <textarea name="body" rows="3" required placeholder="Instruction body"
+            class="w-full bg-neutral-900 border border-neutral-800 rounded p-2"></textarea>
+  <button type="submit" class="px-3 py-1 bg-neutral-800 rounded">Add</button>
+</form>
+<div id="list" hx-get="/api/instructions" hx-trigger="load">Loading…</div>
+{% endblock %}

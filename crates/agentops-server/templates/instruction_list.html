@@ -1,0 +1,11 @@
+<ul class="space-y-2">
+{% for i in items %}
+  <li class="border border-neutral-800 rounded p-2" data-id="{{ i.id }}">
+    <div class="text-xs text-neutral-500">{{ i.phase.as_str() }} · {{ i.position }}</div>
+    <div>{{ i.title }}</div>
+    <pre class="text-sm text-neutral-400 whitespace-pre-wrap">{{ i.body }}</pre>
+    <button hx-delete="/api/instructions/{{ i.id }}" hx-target="closest li" hx-swap="outerHTML"
+            class="text-xs text-neutral-500">Delete</button>
+  </li>
+{% endfor %}
+</ul>

@@ -1,0 +1,8 @@
+<ul class="space-y-1">
+{% for inv in items %}
+  <li class="border border-neutral-800 rounded p-2">
+    <a class="hover:text-white" href="/investigations/{{ inv.id }}">{{ inv.title }}</a>
+    <span class="text-xs text-neutral-500 ml-2">{{ inv.status }}</span>
+  </li>
+{% endfor %}
+</ul>

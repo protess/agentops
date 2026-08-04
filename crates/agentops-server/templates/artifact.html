@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ artifact.title }} — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-1">{{ artifact.title }}</h1>
+<p class="text-xs text-neutral-500 mb-4">{{ artifact.created_at }}</p>
+<pre class="whitespace-pre-wrap">{{ artifact.body }}</pre>
+{% endblock %}

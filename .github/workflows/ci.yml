@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  # CI uses a service container, so there is no port collision — only local uses 55433
+  DATABASE_URL: postgres://agentops:agentops@localhost:5432/agentops
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo fmt --all --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      # Only runtime-validated queries are used, so it compiles without a database
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: agentops
+          POSTGRES_PASSWORD: agentops
+          POSTGRES_DB: agentops
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agentops"
+          --health-interval 2s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      # `--test-threads=4` is a **correctness requirement**, not a performance tweak.
+      # `#[sqlx::test]` creates a connection pool per test and this workspace has 19
+      # test binaries. At the default parallelism they exhaust Postgres's
+      # `max_connections=100` and fail with `Protocol("unexpected response from
+      # SSLRequest: 0x00")` — and it surfaces **in a test unrelated to connections**,
+      # so it looks like a code defect. Measured: the default fails one run in four,
+      # while `--test-threads=4` passed 5/5. Paired with the same rule in CLAUDE.md.
+      - run: cargo test --workspace --all-targets -- --test-threads=4
+      # Fails when a code example in the documentation no longer compiles.
+      # The original brief's axum::Server example was of this kind.
+      # Doc tests do not use `#[sqlx::test]` and create no pools — no cap needed.
+      - run: cargo test --workspace --doc
+
+  # There is no sqlx-offline job. This project does not use the `query!` macro, so
+  # `cargo sqlx prepare` reports "no queries found" and writes an empty .sqlx, and
+  # `--check` passes with or without a cache — spending a postgres service and four
+  # minutes of sqlx-cli installation on a job that checks nothing. Schema drift is
+  # caught by the integration tests in the `test` job above (spec Section 7).
+
+  drift-guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      # Whether the spec's invariant and test item IDs exist in the actual tests
+      - run: python3 scripts/check_spec_test_ids.py
+      # Whether any document is past its revalidation date
+      - run: python3 scripts/check_stale_after.py
+      # Whether the bundle root's document list (docs/index.md) matches the actual bundle.
+      # The two guards above glob the filesystem directly and pass even with an empty
+      # table — in fact the table stayed green since OKF was adopted (9c94e22) while
+      # holding only the spec and omitting three plans. This guard covers that blind spot.
+      - run: python3 scripts/check_index_complete.py

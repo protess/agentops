@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}agentops{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/sse.js"></script>
+</head>
+<body class="bg-neutral-950 text-neutral-100 min-h-screen">
+  <div class="flex h-screen">
+    <nav class="w-48 shrink-0 border-r border-neutral-800 p-4 space-y-2">
+      <a class="block hover:text-white" href="/incidents">Incidents</a>
+      <a class="block hover:text-white" href="/knowledge">Knowledge</a>
+      <a class="block hover:text-white" href="/artifacts">Artifacts</a>
+      <a class="block hover:text-white mt-8 text-neutral-500" href="/settings">Settings</a>
+    </nav>
+    <aside class="w-80 shrink-0 border-r border-neutral-800 flex flex-col">
+      {% block chat %}
+      <!--
+        v0.1 has no UI for choosing a session — it uses one fixed session shared across
+        every page (`routes::chat::DEFAULT_SESSION`,
+        `00000000-0000-0000-0000-000000000001`). This file receives no page handler's
+        context (every page shares `base.html`), so it follows the convention of fetching
+        its fragment itself — the same pattern as
+        `hx-get="/api/investigations" hx-trigger="load"` in `incidents.html`.
+        `panel` creates this session lazily if it does not exist.
+      -->
+      <div hx-get="/api/chat/00000000-0000-0000-0000-000000000001/panel"
+           hx-trigger="load" hx-swap="innerHTML" class="flex-1 flex flex-col">
+        Loading…
+      </div>
+      {% endblock %}
+    </aside>
+    <main class="flex-1 overflow-y-auto p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

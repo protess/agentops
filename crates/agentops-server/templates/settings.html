@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Settings — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-4">Settings</h1>
+<p class="text-xs text-neutral-500 mb-4">MCP server configuration is read-only in v0.1.</p>
+<ul class="space-y-1">
+{% for s in servers %}
+  <li class="border border-neutral-800 rounded p-2">
+    <div>{{ s.name }}</div>
+    <div class="text-xs text-neutral-500">{{ s.transport.as_str() }} · {% if s.enabled %}enabled{% else %}disabled{% endif %}</div>
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}

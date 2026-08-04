@@ -1,0 +1,27 @@
+<!--
+  **`sse-close` is deliberately absent** — the asymmetry with `investigation.html` is
+  intentional. An investigation is one-shot, so `terminal` means "there will never be
+  another event", but a chat session is not — the user can keep sending messages to the
+  same session, so `terminal` only signals "this response is finished" (see the
+  `ChatEvent::Terminal` documentation in `bus.rs`). Adding `sse-close="terminal"` here
+  would close the connection the moment the first response ends, and no further message
+  could arrive. During shutdown the server does end this stream's body with `terminal` to
+  clean up the connection task (final review C-1), but that is because the process is
+  about to exit, not because of a client-side `sse-close` — there is no listener left to accept a reconnect.
+-->
+<div class="flex flex-col h-full" hx-ext="sse" sse-connect="/api/chat/{{ session_id }}/stream">
+  <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm">
+    {{ messages_html|safe }}
+  </div>
+  <div id="chat-live" sse-swap="delta" hx-swap="beforeend" class="px-3 pb-1 text-xs text-neutral-400"></div>
+  <div sse-swap="message" hx-swap="beforeend" hx-target="#chat-messages"></div>
+  <form class="border-t border-neutral-800 p-2 flex gap-2"
+        hx-post="/api/chat/{{ session_id }}/messages"
+        hx-target="#chat-messages" hx-swap="beforeend"
+        hx-on::after-request="this.reset()">
+    <input type="text" name="content" autocomplete="off" required
+           class="flex-1 bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-sm"
+           placeholder="Message…">
+    <button type="submit" class="text-xs text-neutral-400 hover:text-white">Send</button>
+  </form>
+</div>

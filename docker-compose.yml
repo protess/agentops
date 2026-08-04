@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: agentops
+      POSTGRES_PASSWORD: agentops
+      POSTGRES_DB: agentops
+    # Mapped to 55433 — on the authoring machine 5432 and 55432 were taken by an ssh tunnel
+    # and another project's container. On a collision, change this value and DATABASE_URL in .env together.
+    ports: ["55433:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentops"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

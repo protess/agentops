@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Incidents — agentops{% endblock %}
+{% block content %}
+<h1 class="text-xl mb-4">Incidents</h1>
+<form method="post" action="/api/investigations" class="mb-6">
+  <textarea name="prompt" rows="3" required
+            class="w-full bg-neutral-900 border border-neutral-800 rounded p-2"
+            placeholder="What should I investigate?"></textarea>
+  <button type="submit" class="mt-2 px-3 py-1 bg-neutral-800 rounded">Start investigation</button>
+</form>
+<div id="chart" class="mb-6">{{ chart_svg|safe }}</div>
+<div id="list" hx-get="/api/investigations" hx-trigger="load, every 5s">Loading…</div>
+{% endblock %}
